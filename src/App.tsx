@@ -172,9 +172,6 @@ export default function App() {
         }
       ];
     });
-
-    // Open bag drawer so they see feedback
-    setIsBagOpen(true);
   };
 
   const updateQuantity = (id: string, delta: number) => {
@@ -339,7 +336,6 @@ export default function App() {
       return temp;
     });
 
-    setIsBagOpen(true);
     setSurpriseCombo(null);
   };
 
@@ -973,21 +969,23 @@ export default function App() {
                         </span>
                         
                         {isSelected ? (
-                          <div className="flex items-center bg-[#5A5A40] text-white text-xs font-bold rounded-lg p-0.5 shadow-xs transition-all gap-1">
+                          <div className="flex items-center bg-[#5A5A40] text-white text-xs font-bold rounded-lg overflow-hidden h-[30px] shadow-xs transition-all border border-[#5A5A40]">
                             <button
                               onClick={() => updateQuantity(targetId, -1)}
-                              className="px-2 py-1 hover:bg-white/10 rounded transition cursor-pointer"
+                              className="px-3 h-full hover:bg-[#484833] active:bg-[#3d3d2b] transition flex items-center justify-center cursor-pointer"
+                              title="Decrease"
                             >
-                              <Minus size={11} />
+                              <Minus size={11} className="stroke-[3px]" />
                             </button>
-                            <span className="px-1 text-center font-extrabold text-white text-xs min-w-[50px]">
-                              {quantityInBag} Added
+                            <span className="w-10 text-center font-extrabold text-white text-sm bg-[#5A5A40]">
+                              {quantityInBag}
                             </span>
                             <button
                               onClick={() => updateQuantity(targetId, 1)}
-                              className="px-2 py-1 hover:bg-white/10 rounded transition cursor-pointer"
+                              className="px-3 h-full hover:bg-[#484833] active:bg-[#3d3d2b] transition flex items-center justify-center cursor-pointer"
+                              title="Increase"
                             >
-                              <Plus size={11} />
+                              <Plus size={11} className="stroke-[3px]" />
                             </button>
                           </div>
                         ) : (
