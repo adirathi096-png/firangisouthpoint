@@ -414,6 +414,135 @@ export default function App() {
     { hour: "9p", popularity: 80 }
   ];
 
+  // Helper to render Bag/Cart content
+  const renderBagContent = (isMobileLayout = false) => {
+    return (
+      <div className="bg-white rounded-2xl border border-[#F0EBE3] shadow-xs overflow-hidden">
+        <div className="bg-[#5A5A40] text-white p-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShoppingBag size={18} className="text-[#EAB308]" />
+            <span className="font-serif font-bold text-sm">Firangi Combo Bag</span>
+          </div>
+          <span className="bg-[#FAF9F5] text-[#5A5A40] font-extrabold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-sans">
+            {bag.reduce((sum, i) => sum + i.quantity, 0)} Items
+          </span>
+        </div>
+
+        {bag.length === 0 ? (
+          <div className="p-8 text-center text-[#3E3D39]/50 space-y-2 font-sans">
+            <ShoppingBag className="mx-auto text-[#E6E6DF]" size={32} />
+            <p className="text-xs font-semibold text-[#3E3D39]/80">Your bag is currently empty.</p>
+            <p className="text-[11px] text-[#3E3D39]/50">Select yummy momos, wraps, or shakes to build your ultimate combo!</p>
+            <button
+              onClick={() => {
+                const random = MENU_ITEMS[Math.floor(Math.random() * MENU_ITEMS.length)];
+                addToBag(random);
+              }}
+              className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F5F2ED] hover:bg-[#E6E6DF] text-[#3E3D39] text-[11px] font-bold rounded-lg transition cursor-pointer"
+            >
+              Quick Add Random!
+            </button>
+          </div>
+        ) : (
+          <div className="p-4 space-y-4 font-sans">
+            {/* Bag Items list */}
+            <div className={`${isMobileLayout ? "max-h-[40vh]" : "max-h-64"} overflow-y-auto divide-y divide-[#F0EBE3] pr-1`}>
+              {bag.map((item) => (
+                <div key={item.id} className="py-2.5 flex items-center justify-between gap-3 text-xs first:pt-0">
+                  <div className="min-w-0">
+                    <span className="font-bold text-[#3E3D39] block truncate">{item.name}</span>
+                    <span className="text-[10px] text-[#3E3D39]/40 capitalize">
+                      {item.portion !== "standard" ? `${item.portion} portion` : item.category}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-1 bg-[#F5F2ED] rounded-md p-1">
+                      <button
+                        onClick={() => updateQuantity(item.id, -1)}
+                        className="p-0.5 hover:bg-white text-[#3E3D39]/60 rounded cursor-pointer"
+                      >
+                        <Minus size={10} />
+                      </button>
+                      <span className="font-bold w-4 text-center text-[#3E3D39]">{item.quantity}</span>
+                      <button
+                        onClick={() => updateQuantity(item.id, 1)}
+                        className="p-0.5 hover:bg-white text-[#3E3D39]/60 rounded cursor-pointer"
+                      >
+                        <Plus size={10} />
+                      </button>
+                    </div>
+                    <span className="font-extrabold text-[#3E3D39] w-12 text-right">
+                      ₹{item.price * item.quantity}/-
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* UNDER ₹200 FEAST CHALLENGE WIDGET (STORY BASED ON REAL PRICE TIERS) */}
+            <div className="bg-[#FAF9F5] border border-[#F0EBE3] rounded-xl p-3 space-y-2">
+              <div className="flex items-center gap-1.5 text-[#5A5A40] font-bold text-xs">
+                <Award size={14} className="text-[#EAB308] animate-pulse" />
+                <span>The Under-₹200 Feast Challenge</span>
+              </div>
+              <p className="text-[10px] text-[#3E3D39]/70 leading-relaxed">
+                {feastChallengeStatus.message}
+              </p>
+              
+              {feastChallengeStatus.success && (
+                <motion.div 
+                  initial={{ scale: 0.9 }} 
+                  animate={{ scale: 1 }}
+                  className="bg-emerald-50 text-emerald-800 p-2 rounded-lg text-center font-bold text-[10px] uppercase border border-emerald-200"
+                >
+                  🏆 CHALLENGE COMPLETED!
+                </motion.div>
+              )}
+            </div>
+
+            {/* Total calculation */}
+            <div className="border-t border-[#F0EBE3] pt-3 space-y-1.5 text-xs">
+              <div className="flex justify-between text-[#3E3D39]/50">
+                <span>Subtotal</span>
+                <span>₹{bagSubtotal}/-</span>
+              </div>
+              <div className="flex justify-between text-[#3E3D39]/50">
+                <span>SGST / CGST (0%)</span>
+                <span className="text-emerald-700 font-semibold">FREE / Zero Tax</span>
+              </div>
+              <div className="flex justify-between text-[#3E3D39] font-extrabold text-sm pt-1 border-t border-dashed border-[#F0EBE3]">
+                <span>Total Estimated Bill</span>
+                <span className="text-[#5A5A40] text-base font-bold font-serif">₹{bagSubtotal}/-</span>
+              </div>
+            </div>
+
+            {/* Ordering simulated actions */}
+            {orderSuccess ? (
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-center p-3 rounded-xl text-xs font-bold">
+                🎉 Order Estimated! Please call 076962 95330 with your list for instant prep!
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={clearBag}
+                  className="py-2 px-3 border border-[#F0EBE3] hover:bg-[#FAF9F5] text-[#3E3D39]/80 text-xs font-bold rounded-xl transition cursor-pointer"
+                >
+                  Reset Bag
+                </button>
+                <button
+                  onClick={handlePlaceOrder}
+                  className="py-2 px-3 bg-[#5A5A40] hover:bg-[#484833] text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
+                >
+                  Review Order
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#3E3D39] font-sans selection:bg-[#E6E6DF] selection:text-[#3E3D39] pb-20">
       
@@ -1108,129 +1237,8 @@ export default function App() {
           <div className="lg:sticky lg:top-6 space-y-8">
 
             {/* A. COZY SHOPPING BAG / ESTIMATOR */}
-            <div className="bg-white rounded-2xl border border-[#F0EBE3] shadow-xs overflow-hidden">
-              <div className="bg-[#5A5A40] text-white p-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ShoppingBag size={18} className="text-[#EAB308]" />
-                  <span className="font-serif font-bold text-sm">Firangi Combo Bag</span>
-                </div>
-                <span className="bg-[#FAF9F5] text-[#5A5A40] font-extrabold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-sans">
-                  {bag.reduce((sum, i) => sum + i.quantity, 0)} Items
-                </span>
-              </div>
-
-              {bag.length === 0 ? (
-                <div className="p-8 text-center text-[#3E3D39]/50 space-y-2 font-sans">
-                  <ShoppingBag className="mx-auto text-[#E6E6DF]" size={32} />
-                  <p className="text-xs font-semibold text-[#3E3D39]/80">Your bag is currently empty.</p>
-                  <p className="text-[11px] text-[#3E3D39]/50">Select yummy momos, wraps, or shakes to build your ultimate combo!</p>
-                  <button
-                    onClick={() => {
-                      // Grab a random item and add it to cart
-                      const random = MENU_ITEMS[Math.floor(Math.random() * MENU_ITEMS.length)];
-                      addToBag(random);
-                    }}
-                    className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F5F2ED] hover:bg-[#E6E6DF] text-[#3E3D39] text-[11px] font-bold rounded-lg transition cursor-pointer"
-                  >
-                    Quick Add Random!
-                  </button>
-                </div>
-              ) : (
-                <div className="p-4 space-y-4 font-sans">
-                  {/* Bag Items list */}
-                  <div className="max-h-64 overflow-y-auto divide-y divide-[#F0EBE3] pr-1">
-                    {bag.map((item) => (
-                      <div key={item.id} className="py-2.5 flex items-center justify-between gap-3 text-xs first:pt-0">
-                        <div className="min-w-0">
-                          <span className="font-bold text-[#3E3D39] block truncate">{item.name}</span>
-                          <span className="text-[10px] text-[#3E3D39]/40 capitalize">
-                            {item.portion !== "standard" ? `${item.portion} portion` : item.category}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <div className="flex items-center gap-1 bg-[#F5F2ED] rounded-md p-1">
-                            <button
-                              onClick={() => updateQuantity(item.id, -1)}
-                              className="p-0.5 hover:bg-white text-[#3E3D39]/60 rounded cursor-pointer"
-                            >
-                              <Minus size={10} />
-                            </button>
-                            <span className="font-bold w-4 text-center text-[#3E3D39]">{item.quantity}</span>
-                            <button
-                              onClick={() => updateQuantity(item.id, 1)}
-                              className="p-0.5 hover:bg-white text-[#3E3D39]/60 rounded cursor-pointer"
-                            >
-                              <Plus size={10} />
-                            </button>
-                          </div>
-                          <span className="font-extrabold text-[#3E3D39] w-12 text-right">
-                            ₹{item.price * item.quantity}/-
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* UNDER ₹200 FEAST CHALLENGE WIDGET (STORY BASED ON REAL PRICE TIERS) */}
-                  <div className="bg-[#FAF9F5] border border-[#F0EBE3] rounded-xl p-3 space-y-2">
-                    <div className="flex items-center gap-1.5 text-[#5A5A40] font-bold text-xs">
-                      <Award size={14} className="text-[#EAB308] animate-pulse" />
-                      <span>The Under-₹200 Feast Challenge</span>
-                    </div>
-                    <p className="text-[10px] text-[#3E3D39]/70 leading-relaxed">
-                      {feastChallengeStatus.message}
-                    </p>
-                    
-                    {feastChallengeStatus.success && (
-                      <motion.div 
-                        initial={{ scale: 0.9 }} 
-                        animate={{ scale: 1 }}
-                        className="bg-emerald-50 text-emerald-800 p-2 rounded-lg text-center font-bold text-[10px] uppercase border border-emerald-200"
-                      >
-                        🏆 CHALLENGE COMPLETED!
-                      </motion.div>
-                    )}
-                  </div>
-
-                  {/* Total calculation */}
-                  <div className="border-t border-[#F0EBE3] pt-3 space-y-1.5 text-xs">
-                    <div className="flex justify-between text-[#3E3D39]/50">
-                      <span>Subtotal</span>
-                      <span>₹{bagSubtotal}/-</span>
-                    </div>
-                    <div className="flex justify-between text-[#3E3D39]/50">
-                      <span>SGST / CGST (0%)</span>
-                      <span className="text-emerald-700 font-semibold">FREE / Zero Tax</span>
-                    </div>
-                    <div className="flex justify-between text-[#3E3D39] font-extrabold text-sm pt-1 border-t border-dashed border-[#F0EBE3]">
-                      <span>Total Estimated Bill</span>
-                      <span className="text-[#5A5A40] text-base font-bold font-serif">₹{bagSubtotal}/-</span>
-                    </div>
-                  </div>
-
-                  {/* Ordering simulated actions */}
-                  {orderSuccess ? (
-                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-center p-3 rounded-xl text-xs font-bold">
-                      🎉 Order Estimated! Please call 076962 95330 with your list for instant prep!
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        onClick={clearBag}
-                        className="py-2 px-3 border border-[#F0EBE3] hover:bg-[#FAF9F5] text-[#3E3D39]/80 text-xs font-bold rounded-xl transition cursor-pointer"
-                      >
-                        Reset Bag
-                      </button>
-                      <button
-                        onClick={handlePlaceOrder}
-                        className="py-2 px-3 bg-[#5A5A40] hover:bg-[#484833] text-white text-xs font-bold rounded-xl transition shadow-xs cursor-pointer"
-                      >
-                        Review Order
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+            <div className="hidden lg:block">
+              {renderBagContent(false)}
             </div>
 
             {/* B. POPULAR TIMES HISTOGRAM CHART (From user text G-Maps) */}
@@ -1371,6 +1379,76 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* MOBILE FLOATING CART PILL */}
+      {bag.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4 lg:hidden">
+          <button
+            onClick={() => setIsBagOpen(true)}
+            className="w-full bg-[#5A5A40] text-white shadow-xl rounded-full p-4 flex items-center justify-between border border-[#FAF9F5]/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="relative p-2 bg-[#FAF9F5]/10 rounded-full">
+                <ShoppingBag size={20} className="text-[#EAB308]" />
+                <span className="absolute -top-1 -right-1 bg-[#EAB308] text-[#5A5A40] text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#5A5A40]">
+                  {bag.reduce((sum, i) => sum + i.quantity, 0)}
+                </span>
+              </div>
+              <div className="text-left">
+                <span className="text-[10px] uppercase tracking-wider block font-bold text-[#FAF9F5]/60">Your Firangi Bag</span>
+                <span className="text-sm font-bold">₹{bagSubtotal}/-</span>
+              </div>
+            </div>
+            <span className="bg-white/15 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full transition-colors flex items-center gap-1">
+              View Bag →
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* MOBILE BOTTOM SLIDE-UP DRAWER */}
+      <AnimatePresence>
+        {isBagOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex flex-col justify-end">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsBagOpen(false)}
+              className="absolute inset-0 bg-black/60 cursor-pointer"
+            />
+            
+            {/* Slide Up Content */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="relative bg-[#FDFBF7] rounded-t-3xl max-h-[90vh] overflow-hidden flex flex-col border-t border-[#F0EBE3] shadow-2xl z-10"
+            >
+              {/* Top Close indicator/handle */}
+              <div className="flex items-center justify-between p-4 border-b border-[#F0EBE3] bg-white">
+                <div className="flex items-center gap-2">
+                  <ShoppingBag size={20} className="text-[#5A5A40]" />
+                  <h3 className="font-serif font-extrabold text-[#3E3D39] text-base">Your Bag</h3>
+                </div>
+                <button
+                  onClick={() => setIsBagOpen(false)}
+                  className="p-1.5 rounded-full hover:bg-[#F5F2ED] text-[#3E3D39]/60 cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              {/* Scrollable bag content */}
+              <div className="overflow-y-auto p-4 flex-1">
+                {renderBagContent(true)}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
