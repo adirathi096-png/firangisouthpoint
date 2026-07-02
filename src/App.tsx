@@ -887,6 +887,11 @@ export default function App() {
                     ? (item.price as { half: number; full: number })[currentPortion]
                     : (item.price as number);
 
+                  const targetId = isDoublePrice ? `${item.id}-${currentPortion}` : `${item.id}-standard`;
+                  const bagItem = bag.find(b => b.id === targetId);
+                  const quantityInBag = bagItem ? bagItem.quantity : 0;
+                  const isSelected = quantityInBag > 0;
+
                   return (
                     <motion.div
                       layout
@@ -894,7 +899,11 @@ export default function App() {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3 }}
                       key={item.id}
-                      className="bg-white rounded-2xl border border-[#F0EBE3] p-5 shadow-xs hover:shadow-md hover:border-[#5A5A40]/30 transition-all duration-200 flex flex-col justify-between relative group"
+                      className={`rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between relative group ${
+                        isSelected 
+                          ? "bg-[#FAF9F5] border-2 border-[#5A5A40] shadow-md ring-1 ring-[#5A5A40]/10" 
+                          : "bg-white border border-[#F0EBE3] shadow-xs hover:shadow-md hover:border-[#5A5A40]/30"
+                      }`}
                     >
                       {/* Veg Indicator + Specialty Badges */}
                       <div className="flex items-center justify-between mb-2">
@@ -924,7 +933,7 @@ export default function App() {
                               onClick={() => handlePortionChange(item.id, "half")}
                               className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
                                 currentPortion === "half"
-                                  ? "bg-white text-[#3E3D39] shadow-xs"
+                                  ? "bg-white text-[#3E3D39]"
                                   : "text-[#3E3D39]/50 hover:text-[#3E3D39]"
                               }`}
                             >
@@ -934,7 +943,7 @@ export default function App() {
                               onClick={() => handlePortionChange(item.id, "full")}
                               className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
                                 currentPortion === "full"
-                                  ? "bg-white text-[#3E3D39] shadow-xs"
+                                  ? "bg-white text-[#3E3D39]"
                                   : "text-[#3E3D39]/50 hover:text-[#3E3D39]"
                               }`}
                             >
@@ -963,13 +972,33 @@ export default function App() {
                           {item.category}
                         </span>
                         
-                        <button
-                          onClick={() => addToBag(item)}
-                          className="px-3.5 py-1.5 bg-[#5A5A40] hover:bg-[#484833] text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
-                        >
-                          <Plus size={14} />
-                          Add to Bag
-                        </button>
+                        {isSelected ? (
+                          <div className="flex items-center bg-[#5A5A40] text-white text-xs font-bold rounded-lg p-0.5 shadow-xs transition-all gap-1">
+                            <button
+                              onClick={() => updateQuantity(targetId, -1)}
+                              className="px-2 py-1 hover:bg-white/10 rounded transition cursor-pointer"
+                            >
+                              <Minus size={11} />
+                            </button>
+                            <span className="px-1 text-center font-extrabold text-white text-xs min-w-[50px]">
+                              {quantityInBag} Added
+                            </span>
+                            <button
+                              onClick={() => updateQuantity(targetId, 1)}
+                              className="px-2 py-1 hover:bg-white/10 rounded transition cursor-pointer"
+                            >
+                              <Plus size={11} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => addToBag(item)}
+                            className="px-3.5 py-1.5 bg-[#5A5A40] hover:bg-[#484833] text-white text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
+                          >
+                            <Plus size={14} />
+                            Add to Bag
+                          </button>
+                        )}
                       </div>
                     </motion.div>
                   );
