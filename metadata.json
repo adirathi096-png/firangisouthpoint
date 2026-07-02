@@ -1,0 +1,6 @@
+{
+  "name": "The Firangi South Point",
+  "description": "A cozy, modern fast-food cafe website in Sonipat featuring a scrolling menu, user reviews, and interactive cafe experiences.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
